@@ -85,11 +85,58 @@ pip install -e .
 ```
 
 ## Examples
-TODO
+
+Examples are found in the examples folder. There are four distinct ELEN models depending on the feature sets used.
+--feature_mode full will run the biggest ELEN model including geometric, pysicochemical and LLM features
+## Examples
+
+Examples are found in the `examples` folder.  
+There are **four distinct ELEN modes**, each corresponding to a different feature set for model quality assessment:
+
+- **`--feature_mode full`**  
+  Runs the largest ELEN model, using **all available features**: geometric, physicochemical (Rosetta), and large language model (LLM) sequence embeddings (e.g., SaProt).  
+  _This is the most comprehensive and accurate mode._
+
+- **`--feature_mode no_saprot`**  
+  Runs ELEN **without LLM (SaProt) sequence features**.  
+  Only geometric and physicochemical features are used.  
+  _Use this if you do not have SaProt installed or want a pure structure-based assessment._
+
+- **`--feature_mode saprot_only`**  
+  Runs ELEN **using only sequence (SaProt/LLM) features**, ignoring geometric and Rosetta features.  
+  _Useful for benchmarking the predictive power of sequence embeddings alone._
+
+- **`--feature_mode geom_only`**  
+  Runs ELEN using **only geometric (structure-based) features**; no physicochemical or sequence features.  
+  _This provides a purely geometry-based baseline._
+
+Each mode has a corresponding example script in the `examples` folder:
+- `run_elen_full_model.sh`
+- `run_elen_no_saprot_model.sh`
+- `run_elen_saprot_only_model.sh`
+- `run_elen_geometry_only_model.sh`
+
+> For details on required input folders and environment setup, see the comments inside each example script.
+
+---
+
+### SaProt Requirements
+
+- The **`full`** and **`saprot_only`** modes require [SaProt](https://github.com/xxx/saprot) to be installed.
+- SaProt may require its own Conda environment and can be used via the `--path_saprot` option.
+- If SaProt is not available, use `no_saprot` or `geom_only` modes.
+
+---
+
+### Example Commands
+
+```bash
+# Full model (all features)
+sbatch run_elen_full_model.sh
 
 ## Status and Availability
 
-This project is currently in active development and pending publication. The source code, trained models, and datasets will be made publicly available upon official release.
+This project is currently in active development and pending publication. The training code and datasets will be made publicly available upon official release.
 
 ## Contact
 

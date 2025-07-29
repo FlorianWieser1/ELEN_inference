@@ -26,7 +26,7 @@ import pytorch_lightning as pl
 import atom3d.datasets as da
 
 # ========== Local/Project-Specific ==========
-from elen.config import PATH_DP_SCRIPTS, PATH_ELEN_MODELS, PATH_ROSETTA_TOOLS
+from elen.config import PATH_DP_SCRIPTS, PATH_ELEN_MODELS, PATH_SAPROT
 from elen.inference.utils_inference import (
     add_combined_scores_to_dict,
     custom_collate_fn,
@@ -203,6 +203,7 @@ def run_inference(
     if elen_models in [["ELEN_full"], ["ELEN_SeqOnly"]]:
         saprot_model = "saprot_650M"
         # calculate sequence embeddings only if they are not provided by CL
+        print(f"saprot_embeddings_file: {saprot_embeddings_file}")
         if saprot_embeddings_file is not None and os.path.exists(saprot_embeddings_file):
             logging.info(f"Using provided SaProt embeddings from {saprot_embeddings_file}")
             path_saprot_embeddings = saprot_embeddings_file
@@ -213,9 +214,11 @@ def run_inference(
                 logging.info("Calculating sequence embeddings.")
                 # Run external embedding script
                 result = subprocess.run([
+                    "/home/florian_wieser/anaconda3/bin/conda", "run", "-n", "SaProt", "python",
                     f"{PATH_DP_SCRIPTS}/compute_SaProt_embeddings.py",
                     "--inpath_models", path_pdbs_prepared,
                     "--outpath", path_features,
+                    "--path_saprot", PATH_SAPROT,
                     "--saprot_model", saprot_model,
                     "--write_json"
                 ], capture_output=True)
