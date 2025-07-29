@@ -86,10 +86,6 @@ pip install -e .
 
 ## Examples
 
-Examples are found in the examples folder. There are four distinct ELEN models depending on the feature sets used.
---feature_mode full will run the biggest ELEN model including geometric, pysicochemical and LLM features
-## Examples
-
 Examples are found in the `examples` folder.  
 There are **four distinct ELEN modes**, each corresponding to a different feature set for model quality assessment:
 
