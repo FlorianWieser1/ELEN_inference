@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pandas as pd
 from typing import Dict, Any
-from Bio.PDB import PDBParser, PDBIO
+from Bio.PDB import PDBParser, PDBIO, StructureBuilder
 from types import SimpleNamespace
 from elen.shared_utils.utils_pdb import get_residue_ids
 
@@ -334,3 +334,47 @@ def custom_collate_fn(batch):
     if not filtered_batch:
         raise ValueError("All datapoints in batch were None!")
     return filtered_batch
+
+def merge_pdb_chains(pdb_chain_files, output_path):
+    """
+    Merge multiple single-chain PDB files into one multichain PDB file using Biopython.
+
+    Parameters
+    ----------
+    pdb_chain_files : list[str]
+        List of PDB file paths (each containing one chain) to merge.
+    output_path : str
+        Path to save the merged multichain PDB file.
+
+    Notes
+    -----
+    - Preserves atom names, residue numbering, and B-factors.
+    - Assigns unique chain IDs automatically (A, B, C...).
+    - Uses Biopython Structure → Model → Chain hierarchy.
+    """
+    if not pdb_chain_files:
+        raise ValueError("No PDB files provided for merging.")
+
+    parser = PDBParser(QUIET=True)
+    builder = StructureBuilder.StructureBuilder()
+    builder.init_structure("merged")
+    builder.init_model(0)
+
+    current_chain_id = ord("A")
+
+    for pdb_path in sorted(pdb_chain_files):
+        structure = parser.get_structure(os.path.basename(pdb_path), pdb_path)
+        model = structure[0]
+
+        for chain in model:
+            # Force chain ID assignment (A, B, C, ...)
+            new_chain_id = chr(current_chain_id)
+            current_chain_id += 1
+
+            chain.id = new_chain_id
+            builder.structure[0].add(chain.copy())
+
+    # Save merged structure
+    io = PDBIO()
+    io.set_structure(builder.get_structure())
+    io.save(output_path)

@@ -1,3 +1,5 @@
+#!/home/florian_wieser/miniconda3/envs/elen/bin/python
+##!/home/florian_wieser/miniconda3/envs/SaProt/bin/python
 """
 compute_SaProt_embeddings.py
 

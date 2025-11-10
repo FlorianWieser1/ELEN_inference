@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+Loop and residue pocket extraction tool for PDB files.
+
+- Extracts loop regions based on DSSP secondary structure assignment.
+- Extracts residue pockets (local environments) around each residue.
+- Cleans PDBs and supports chain/numbering normalization.
+
+Author: Florian Wieser
+"""
 import warnings
 import os
 import sys
@@ -305,7 +314,7 @@ def extract_residues(path_pdb, outpath, nr_residues):
     pdb_parser = PDBParser()
     original_structure = pdb_parser.get_structure('PDB_ID', path_pdb)
     new_model = clean_structure(original_structure)
-    for chain in new_model[0]:
+    for chain in new_model:
         path_pdb = rosetta_numbering(path_pdb, chain)
         total_residues = get_total_number_of_residues(path_pdb)
         for res_id in range(1, total_residues + 1):

@@ -37,7 +37,8 @@ from elen.inference.utils_inference import (
     process_residue_data,
     process_pdb_files,
     split_into_chain,
-    convert_numpy
+    convert_numpy,
+    merge_pdb_chains
 )
 import elen.training.data as d
 import elen.training.model as m
@@ -302,6 +303,41 @@ def run_inference(
             process_pdb_files(df_scores, outpath_elen_model, path_pdbs_prepared, path_pdbs_split, pocket_type, False)
         elif pocket_type == "RP":
             process_pdb_files(df_scores, outpath_elen_model, path_pdbs_prepared, path_pdbs_split, pocket_type, True)
+            
+        # --- Merge chains back into multichain PDBs for each protein ---
+        try:
+            pdb_chain_files = sorted(glob.glob(os.path.join(outpath_elen_model, "*_RP_elen_scored.pdb")))
+            if not pdb_chain_files:
+                logging.info("No scored PDBs found for merging.")
+            else:
+                # Group by protein prefix (everything before first underscore)
+                protein_groups = {}
+                for path in pdb_chain_files:
+                    base = os.path.basename(path)
+                    prefix = base.split("_")[0]  
+                    protein_groups.setdefault(prefix, []).append(path)
+
+                # Merge chains per protein
+                for prefix, chain_files in protein_groups.items():
+                    if len(chain_files) > 1:
+                        merged_out = os.path.join(
+                            outpath_elen_model,
+                            f"{prefix}_merged_RP_elen_scored.pdb"
+                        )
+                        merge_pdb_chains(chain_files, merged_out)
+                        logging.info(f"Merged {len(chain_files)} chain PDBs for {prefix} → {os.path.basename(merged_out)}")
+
+                        # Remove the individual chain PDBs after successful merge
+                        for f in chain_files:
+                            try:
+                                os.remove(f)
+                                logging.debug(f"Deleted {f}")
+                            except Exception as e:
+                                logging.warning(f"Could not delete {f}: {str(e)}")
+                    else:
+                        logging.info(f"Single chain for {prefix}, skipping merge.")
+        except Exception as e:
+            logging.error(f"Error merging PDB chains: {str(e)}")
 
         logging.info("Done.")
 
