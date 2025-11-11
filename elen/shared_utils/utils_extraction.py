@@ -256,7 +256,7 @@ def extract_loops(path_pdb, outpath, ss_frag, ss_frag_size, loop_max_size, nr_re
     for chain in structure[0]:
         path_pdb = rosetta_numbering(path_pdb, chain)
         ss, sequence = get_BioPython_DSSP(path_pdb, PATH_DSSP)
-        print_ruler(ss, sequence)
+        #print_ruler(ss, sequence)
         loop_positions = get_loop_positions(ss, ss_frag, ss_frag_size, loop_max_size)
         for idx, loop in enumerate(loop_positions):
             loop_type = f"{ss[loop[0] - 2]}{ss[loop[1]]}"

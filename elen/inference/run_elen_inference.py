@@ -13,6 +13,7 @@ import glob
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -204,7 +205,6 @@ def run_inference(
     if elen_models in [["ELEN_full"], ["ELEN_SeqOnly"]]:
         saprot_model = "saprot_650M"
         # calculate sequence embeddings only if they are not provided by CL
-        print(f"saprot_embeddings_file: {saprot_embeddings_file}")
         if saprot_embeddings_file is not None and os.path.exists(saprot_embeddings_file):
             logging.info(f"Using provided SaProt embeddings from {saprot_embeddings_file}")
             path_saprot_embeddings = saprot_embeddings_file
@@ -306,23 +306,23 @@ def run_inference(
             
         # --- Merge chains back into multichain PDBs for each protein ---
         try:
-            pdb_chain_files = sorted(glob.glob(os.path.join(outpath_elen_model, "*_RP_elen_scored.pdb")))
+            pdb_chain_files = sorted(glob.glob(os.path.join(outpath_elen_model, f"*_{pocket_type}_elen_scored.pdb")))
             if not pdb_chain_files:
                 logging.info("No scored PDBs found for merging.")
             else:
-                # Group by protein prefix (everything before first underscore)
+                # Group by base filename prefix (remove chain ID + "_RP_elen_scored.pdb" suffix)
                 protein_groups = {}
                 for path in pdb_chain_files:
                     base = os.path.basename(path)
-                    prefix = base.split("_")[0]  
+                    # Matches the base like '8vejcid_4_C3_ran180-180-180_dist30_ran5_w1_potential_8_32'
+                    prefix = re.sub(rf'_[A-Za-z0-9]+_{pocket_type}_elen_scored\.pdb$', '', base)
                     protein_groups.setdefault(prefix, []).append(path)
-
                 # Merge chains per protein
                 for prefix, chain_files in protein_groups.items():
                     if len(chain_files) > 1:
                         merged_out = os.path.join(
                             outpath_elen_model,
-                            f"{prefix}_merged_RP_elen_scored.pdb"
+                            f"{prefix}_merged_{pocket_type}_elen_scored.pdb"
                         )
                         merge_pdb_chains(chain_files, merged_out)
                         logging.info(f"Merged {len(chain_files)} chain PDBs for {prefix} → {os.path.basename(merged_out)}")
@@ -338,7 +338,6 @@ def run_inference(
                         logging.info(f"Single chain for {prefix}, skipping merge.")
         except Exception as e:
             logging.error(f"Error merging PDB chains: {str(e)}")
-
         logging.info("Done.")
 
 

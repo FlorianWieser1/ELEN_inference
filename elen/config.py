@@ -5,6 +5,6 @@ PATH_DP_SCRIPTS      = os.path.join(PATH_PROJECT, "elen/scripts/data_preparation
 PATH_INFERENCE       = os.path.join(PATH_PROJECT, "inference")
 PATH_ROSETTA_TOOLS   = os.getenv("ROSETTA_TOOLS", os.path.join(PATH_PROJECT, "rosetta_tools"))  # fallback
 PATH_PYTHON          = os.getenv("PYTHON_PATH", "python")  # just use 'python' in path by default
-PATH_DSSP            = os.path.join(PATH_PROJECT, )
+PATH_DSSP            = os.path.join("/home/florian_wieser/miniconda3/envs/elen_test/bin/mkdssp")
 PATH_SAPROT          = os.getenv("PATH_SAPROT", os.path.join("/home/florian_wieser/software/SaProt"))
 PATH_ELEN_MODELS     = os.getenv("ELEN_MODELS", os.path.join(PATH_PROJECT, "models"))
